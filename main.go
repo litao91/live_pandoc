@@ -24,6 +24,7 @@ type MDServer struct {
 func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	file := strings.Trim(ps.ByName("file"), "/")
 	filePath := path.Join(server.docPath, file)
+	fmt.Printf("Loading file: %s\n", filePath)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "file %s not found", filePath)
@@ -48,9 +49,9 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 		}
 		return
 	}
-	cmdStr := server.pandocCmd + " --css=" + server.csspath
-	cmdStr = fmt.Sprintf(cmdStr, filePath)
-	fmt.Println("Command: " + cmdStr)
+
+	cmdStr := fmt.Sprintf(server.pandocCmd, server.csspath, filePath)
+	fmt.Println(cmdStr)
 	cmd := exec.Command("bash", "-c", cmdStr)
 	var stdout, err = cmd.StdoutPipe()
 	if err != nil {
@@ -88,7 +89,7 @@ func NewServer(filePath string, port int64, csspath string) (server *MDServer) {
 		host:      "127.0.0.1",
 		port:      port,
 		docPath:      filePath,
-		pandocCmd: "pandoc -s --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html %s",
+		pandocCmd: "pandoc -s --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html5 --css %s %s",
 		csspath: csspath,
 	}
 	return
@@ -106,12 +107,8 @@ func main() {
 	} else {
 		docPath = wd
 	}
-	if (len(os.Args) >= 3) {
-		cssPath = os.Args[2]
-	} else {
-		cssPath = path.Join(wd, "pandoc.css")
-	}
 
+	cssPath = path.Join(docPath, "pandoc.css")
 	server := NewServer(docPath, 3333, cssPath)
 	fmt.Printf("%v", server.RunHTTPServer())
 }
