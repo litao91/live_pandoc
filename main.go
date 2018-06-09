@@ -32,23 +32,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	if (!strings.HasSuffix(file, ".md")) {
-		f, err := os.Open(filePath)
-		if err != nil {
-			fmt.Fprintf(w, "%v", err)
-			return
-		}
-		defer f.Close()
-		data := make([]byte, 4096)
-		for {
-			data = data[:cap(data)]
-			n, err := f.Read(data)
-			if err != nil {
-				break;
-			}
-			data = data[:n]
-			w.Write(data);
-		}
-		return
+		http.ServeFile(w, r, filePath)
 	}
 
 	cmdStr := fmt.Sprintf(server.pandocCmd, server.includeHTMLPath, filePath)
@@ -64,6 +48,9 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 		fmt.Printf("%v", err)
 		return
 	}
+
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
 
 	reader := bufio.NewReader(stdout)
 	for {
