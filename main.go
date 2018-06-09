@@ -10,23 +10,46 @@ import (
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
+	"path/filepath"
 )
 
 type MDServer struct {
 	host      string
 	port      int64
-	path      string
+	docPath      string
 	pandocCmd string
+	csspath string
 }
 
 func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	file := strings.Trim(ps.ByName("file"), "/")
-	filePath := path.Join(server.path, file)
+	filePath := path.Join(server.docPath, file)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "file %s not found", filePath)
+		return
 	}
-	cmdStr := fmt.Sprintf(server.pandocCmd, filePath)
+	if (!strings.HasSuffix(file, ".md")) {
+		f, err := os.Open(filePath)
+		if err != nil {
+			fmt.Fprintf(w, "%v", err)
+			return
+		}
+		defer f.Close()
+		data := make([]byte, 4096)
+		for {
+			data = data[:cap(data)]
+			n, err := f.Read(data)
+			if err != nil {
+				break;
+			}
+			data = data[:n]
+			w.Write(data);
+		}
+		return
+	}
+	cmdStr := server.pandocCmd + " --css=" + server.csspath
+	cmdStr = fmt.Sprintf(cmdStr, filePath)
 	fmt.Println("Command: " + cmdStr)
 	cmd := exec.Command("bash", "-c", cmdStr)
 	var stdout, err = cmd.StdoutPipe()
@@ -60,19 +83,35 @@ func (server *MDServer) RunHTTPServer() (err error) {
 	return
 }
 
-func NewServer(filePath string, port int64) (server *MDServer) {
+func NewServer(filePath string, port int64, csspath string) (server *MDServer) {
 	server = &MDServer{
 		host:      "127.0.0.1",
 		port:      port,
-		path:      filePath,
+		docPath:      filePath,
 		pandocCmd: "pandoc -s --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html %s",
+		csspath: csspath,
 	}
 	return
 
 }
 
 func main() {
-	path := os.Args[1]
-	server := NewServer(path, 3333)
+	wd, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+	var docPath, cssPath string
+	if (len(os.Args) >= 2) {
+		docPath =  os.Args[1]
+	} else {
+		docPath = wd
+	}
+	if (len(os.Args) >= 3) {
+		cssPath = os.Args[2]
+	} else {
+		cssPath = path.Join(wd, "pandoc.css")
+	}
+
+	server := NewServer(docPath, 3333, cssPath)
 	fmt.Printf("%v", server.RunHTTPServer())
 }
