@@ -18,7 +18,7 @@ type MDServer struct {
 	port      int64
 	docPath      string
 	pandocCmd string
-	csspath string
+	includeHTMLPath string
 }
 
 func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -50,7 +50,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	cmdStr := fmt.Sprintf(server.pandocCmd, server.csspath, filePath)
+	cmdStr := fmt.Sprintf(server.pandocCmd, server.includeHTMLPath, filePath)
 	fmt.Println(cmdStr)
 	cmd := exec.Command("bash", "-c", cmdStr)
 	var stdout, err = cmd.StdoutPipe()
@@ -84,13 +84,13 @@ func (server *MDServer) RunHTTPServer() (err error) {
 	return
 }
 
-func NewServer(filePath string, port int64, csspath string) (server *MDServer) {
+func NewServer(filePath string, port int64, includeHTMLPath string) (server *MDServer) {
 	server = &MDServer{
 		host:      "127.0.0.1",
 		port:      port,
 		docPath:      filePath,
-		pandocCmd: "pandoc -s --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html5 -H %s %s",
-		csspath: csspath,
+		pandocCmd: "pandoc -s --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html5 --no-highlight -H %s %s",
+		includeHTMLPath: includeHTMLPath,
 	}
 	return
 
@@ -101,14 +101,14 @@ func main() {
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
-	var docPath, cssPath string
+	var docPath, includeHTMLPath string
 	if (len(os.Args) >= 2) {
 		docPath =  os.Args[1]
 	} else {
 		docPath = wd
 	}
 
-	cssPath = path.Join(docPath, "pandoc.css")
-	server := NewServer(docPath, 3333, cssPath)
+	includeHTMLPath = path.Join(docPath, "pandoc.html")
+	server := NewServer(docPath, 3333, includeHTMLPath)
 	fmt.Printf("%v", server.RunHTTPServer())
 }
