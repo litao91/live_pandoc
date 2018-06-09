@@ -22,6 +22,10 @@ type MDServer struct {
 func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	file := strings.Trim(ps.ByName("file"), "/")
 	filePath := path.Join(server.path, file)
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "file %s not found", filePath)
+	}
 	cmdStr := fmt.Sprintf(server.pandocCmd, filePath)
 	fmt.Println("Command: " + cmdStr)
 	cmd := exec.Command("bash", "-c", cmdStr)
