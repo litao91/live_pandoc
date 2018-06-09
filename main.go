@@ -28,6 +28,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "file %s not found", filePath)
+		fmt.Printf("file %s not found\n", filePath)
 		return
 	}
 	if (!strings.HasSuffix(file, ".md")) {
