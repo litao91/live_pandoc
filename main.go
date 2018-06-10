@@ -77,7 +77,7 @@ func NewServer(filePath string, port int64, includeHTMLPath string) (server *MDS
 		host:      "127.0.0.1",
 		port:      port,
 		docPath:      filePath,
-		pandocCmd: "pandoc -s --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html5 --no-highlight -H %s %s",
+		pandocCmd: "pandoc -s --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html5 --no-highlight --template %s %s",
 		includeHTMLPath: includeHTMLPath,
 	}
 	return
@@ -96,7 +96,7 @@ func main() {
 		docPath = wd
 	}
 
-	includeHTMLPath = path.Join(docPath, "pandoc.html")
+	includeHTMLPath = path.Join(docPath, "pandoc_template.html")
 	server := NewServer(docPath, 3333, includeHTMLPath)
 	fmt.Printf("%v", server.RunHTTPServer())
 }
