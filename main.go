@@ -33,6 +33,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 	}
 	if (!strings.HasSuffix(file, ".md")) {
 		http.ServeFile(w, r, filePath)
+		return
 	}
 
 	cmdStr := fmt.Sprintf(server.pandocCmd, server.includeHTMLPath, filePath)
