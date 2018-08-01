@@ -9,15 +9,16 @@ import (
 	"path"
 	"strings"
 
-	"github.com/julienschmidt/httprouter"
 	"path/filepath"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type MDServer struct {
-	host      string
-	port      int64
-	docPath      string
-	pandocCmd string
+	host            string
+	port            int64
+	docPath         string
+	pandocCmd       string
 	includeHTMLPath string
 }
 
@@ -31,7 +32,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 		fmt.Printf("file %s not found\n", filePath)
 		return
 	}
-	if (!strings.HasSuffix(file, ".md")) {
+	if !strings.HasSuffix(file, ".md") {
 		http.ServeFile(w, r, filePath)
 		return
 	}
@@ -75,10 +76,10 @@ func (server *MDServer) RunHTTPServer() (err error) {
 
 func NewServer(filePath string, port int64, includeHTMLPath string) (server *MDServer) {
 	server = &MDServer{
-		host:      "127.0.0.1",
-		port:      port,
-		docPath:      filePath,
-		pandocCmd: "pandoc -s --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html5 --no-highlight --template %s %s",
+		host:            "127.0.0.1",
+		port:            port,
+		docPath:         filePath,
+		pandocCmd:       "pandoc -s --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=gfm --to=html5 --no-highlight --template %s %s",
 		includeHTMLPath: includeHTMLPath,
 	}
 	return
@@ -91,8 +92,8 @@ func main() {
 		fmt.Printf("%v\n", err)
 	}
 	var docPath, includeHTMLPath string
-	if (len(os.Args) >= 2) {
-		docPath =  os.Args[1]
+	if len(os.Args) >= 2 {
+		docPath = os.Args[1]
 	} else {
 		docPath = wd
 	}
