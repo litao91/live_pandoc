@@ -79,7 +79,7 @@ func NewServer(filePath string, port int64, includeHTMLPath string) (server *MDS
 		host:            "127.0.0.1",
 		port:            port,
 		docPath:         filePath,
-		pandocCmd:       "pandoc -s --columns=200 --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html5 --no-highlight --template %s %s",
+		pandocCmd:       "pandoc --filter graphviz.py -s --columns=200 --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html5 --no-highlight --template %s %s",
 		includeHTMLPath: includeHTMLPath,
 	}
 	return
