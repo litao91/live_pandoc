@@ -76,7 +76,7 @@ func (server *MDServer) RunHTTPServer() (err error) {
 
 func NewServer(filePath string, port int64, includeHTMLPath string) (server *MDServer) {
 	server = &MDServer{
-		host:            "127.0.0.1",
+		host:            "0.0.0.0",
 		port:            port,
 		docPath:         filePath,
 		pandocCmd:       "pandoc --filter graphviz.py -s --columns=200 --toc --mathjax=http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML  --from=markdown+pipe_tables --to=html5 --no-highlight --template %s %s",
