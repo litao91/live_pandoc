@@ -37,10 +37,27 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
+	fd, err := os.Open(filePath)
+	if err != nil {
+		fmt.Println("Error reading file! " + filePath)
+		http.Error(w, "File not found", http.StatusNotFound)
+		return
+	}
+	scanner := bufio.NewScanner(fd)
+	var title string
+	if scanner.Scan() {
+		title = strings.TrimLeft(scanner.Text(), "#")
+	}
+	fd.Close()
+
 	cmdStr := fmt.Sprintf(server.pandocCmd, server.includeHTMLPath, filePath)
+	if title != "" {
+		cmdStr = fmt.Sprintf("%s --title \"%s\"", cmdStr, title)
+	}
+
 	fmt.Println(cmdStr)
 	cmd := exec.Command("bash", "-c", cmdStr)
-	var stdout, err = cmd.StdoutPipe()
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		fmt.Printf("%v", err)
 		return
