@@ -46,7 +46,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 	scanner := bufio.NewScanner(fd)
 	var title string
 	if scanner.Scan() {
-		title = strings.TrimLeft(scanner.Text(), "#")
+		title = strings.TrimLeft(strings.TrimLeft(scanner.Text(), "#"), " ")
 	}
 	fd.Close()
 
