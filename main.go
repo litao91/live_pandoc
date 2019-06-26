@@ -63,6 +63,8 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 
 	renderer := blackfriday.NewHTMLRenderer(
 		blackfriday.HTMLRendererParameters{
+			Flags: blackfriday.EnableChart,
+			ChartLangs: []string{"dot", "flow", "mermaid"},
 		})
 
 	extensions := blackfriday.Tables | blackfriday.FencedCode | blackfriday.Autolink | blackfriday.Strikethrough | blackfriday.AutoHeadingIDs | blackfriday.NoEmptyLineBeforeBlock | blackfriday.BackslashLineBreak | blackfriday.DefinitionLists | blackfriday.SpaceHeadings | blackfriday.MathJaxSupport
