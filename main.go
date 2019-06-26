@@ -126,6 +126,6 @@ func main() {
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
-	server := NewServer(docPath, 3334, htmlTemplate)
+	server := NewServer(docPath, 3333, htmlTemplate)
 	fmt.Printf("%v\n", server.RunHTTPServer())
 }
