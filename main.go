@@ -80,6 +80,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 	server.htmlTemplate.Execute(io.Writer(&buf), content)
 
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write(buf.Bytes())
 }
