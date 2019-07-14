@@ -17,6 +17,7 @@ import (
 
 	chromahtml "github.com/alecthomas/chroma/formatters/html"
 	"github.com/julienschmidt/httprouter"
+	mathjax "github.com/litao91/goldmark-mathjax"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting"
 	"github.com/yuin/goldmark/extension"
@@ -68,7 +69,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 	title := strings.TrimLeft(strings.TrimLeft(line, "#"), " ")
 
 	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM, extension.Table, extension.DefinitionList, extension.Footnote, extension.Typographer, highlighting.NewHighlighting(
+		goldmark.WithExtensions(extension.GFM, extension.Table, extension.DefinitionList, extension.Footnote, extension.Typographer, mathjax.MathJax, highlighting.NewHighlighting(
 			highlighting.WithStyle("github"),
 			highlighting.WithFormatOptions(
 				chromahtml.WithLineNumbers(),
