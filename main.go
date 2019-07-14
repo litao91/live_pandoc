@@ -12,9 +12,12 @@ import (
 
 	"io/ioutil"
 
-	"github.com/julienschmidt/httprouter"
-	"github.com/litao91/blackfriday"
 	"bytes"
+	"github.com/julienschmidt/httprouter"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer/html"
 	"io"
 )
 
@@ -26,7 +29,7 @@ type MDServer struct {
 }
 
 type MDContent struct {
-	Body string
+	Body  string
 	Title string
 }
 
@@ -61,17 +64,25 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 	// find the first line
 	title := strings.TrimLeft(strings.TrimLeft(line, "#"), " ")
 
-	renderer := blackfriday.NewHTMLRenderer(
-		blackfriday.HTMLRendererParameters{
-		})
-
-	extensions := blackfriday.Tables | blackfriday.FencedCode | blackfriday.Autolink | blackfriday.Strikethrough | blackfriday.AutoHeadingIDs | blackfriday.NoEmptyLineBeforeBlock | blackfriday.BackslashLineBreak | blackfriday.DefinitionLists | blackfriday.SpaceHeadings | blackfriday.MathJaxSupport
+	md := goldmark.New(
+		goldmark.WithExtensions(extension.GFM, extension.Table, extension.DefinitionList, extension.Footnote, extension.Typographer),
+		goldmark.WithParserOptions(
+			parser.WithAutoHeadingID(),
+		),
+		goldmark.WithRendererOptions(
+			html.WithHardWraps(),
+			html.WithXHTML(),
+		),
+	)
 
 	// todo more control on the parsing process
-	body := blackfriday.Run(mdContent, blackfriday.WithExtensions(extensions), blackfriday.WithRenderer(renderer))
+	var html bytes.Buffer
+	if err := md.Convert(mdContent, &html); err != nil {
+		fmt.Println(err)
+	}
 
-	content := MDContent {
-		Body: string(body),
+	content := MDContent{
+		Body:  html.String(),
 		Title: title,
 	}
 
