@@ -13,12 +13,15 @@ import (
 	"io/ioutil"
 
 	"bytes"
+	"io"
+
+	chromahtml "github.com/alecthomas/chroma/formatters/html"
 	"github.com/julienschmidt/httprouter"
 	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
-	"io"
 )
 
 type MDServer struct {
@@ -65,7 +68,12 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 	title := strings.TrimLeft(strings.TrimLeft(line, "#"), " ")
 
 	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM, extension.Table, extension.DefinitionList, extension.Footnote, extension.Typographer),
+		goldmark.WithExtensions(extension.GFM, extension.Table, extension.DefinitionList, extension.Footnote, extension.Typographer, highlighting.NewHighlighting(
+			highlighting.WithStyle("github"),
+			highlighting.WithFormatOptions(
+				chromahtml.WithLineNumbers(),
+			),
+		)),
 		goldmark.WithParserOptions(
 			parser.WithAutoHeadingID(),
 		),
