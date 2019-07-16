@@ -79,8 +79,8 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 			parser.WithAutoHeadingID(),
 		),
 		goldmark.WithRendererOptions(
-			html.WithHardWraps(),
 			html.WithXHTML(),
+			html.WithUnsafe(),
 		),
 	)
 
