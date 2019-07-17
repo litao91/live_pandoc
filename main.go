@@ -69,7 +69,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 	title := strings.TrimLeft(strings.TrimLeft(line, "#"), " ")
 
 	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM, extension.Table, extension.DefinitionList, extension.Footnote, extension.Typographer, mathjax.MathJax, highlighting.NewHighlighting(
+		goldmark.WithExtensions(extension.GFM, extension.Table, extension.DefinitionList, extension.Footnote, extension.Typographer, mathjax.NewMathJax(mathjax.WithInlineDelim(`$$`, `$$`), mathjax.WithBlockDelim(`$$`, `$$`)), highlighting.NewHighlighting(
 			highlighting.WithStyle("github"),
 			highlighting.WithFormatOptions(
 				chromahtml.WithLineNumbers(),
