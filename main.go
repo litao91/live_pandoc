@@ -37,6 +37,22 @@ type MDContent struct {
 	Title string
 }
 
+func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		// Get the Basic Authentication credentials
+		user, password, hasAuth := r.BasicAuth()
+
+		if hasAuth && user == requiredUser && password == requiredPassword {
+			// Delegate request to the given handle
+			h(w, r, ps)
+		} else {
+			// Request Basic Authentication otherwise
+			w.Header().Set("WWW-Authenticate", "Basic realm=Restricted")
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		}
+	}
+}
+
 func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	file := strings.Trim(ps.ByName("file"), "/")
 	filePath := path.Join(server.docPath, file)
@@ -107,7 +123,9 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 
 func (server *MDServer) RunHTTPServer() (err error) {
 	router := httprouter.New()
-	router.GET("/*file", server.handleReq)
+	user := os.Getenv("doc_user")
+	password := os.Getenv("doc_password")
+	router.GET("/*file", BasicAuth(server.handleReq, user, password))
 	addr := fmt.Sprintf("%s:%d", server.host, server.port)
 	fmt.Println("Listening to " + addr)
 	err = http.ListenAndServe(addr, router)
