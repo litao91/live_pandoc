@@ -88,7 +88,7 @@ func (server *MDServer) handleReq(w http.ResponseWriter, r *http.Request, ps htt
 		goldmark.WithExtensions(extension.GFM, extension.Table, extension.DefinitionList, extension.Footnote, extension.Typographer, mathjax.NewMathJax(mathjax.WithInlineDelim(`\(`, `\)`), mathjax.WithBlockDelim(`\[`, `\]`)) /*mathjax.Tex,*/, highlighting.NewHighlighting(
 			highlighting.WithStyle("github"),
 			highlighting.WithFormatOptions(
-				chromahtml.WithLineNumbers(),
+				chromahtml.WithLineNumbers(true),
 			),
 		)),
 		goldmark.WithParserOptions(
